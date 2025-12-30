@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema de Laboratorio - Registro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/Style1.css">
+</head>
+<body>
+
+<div class="student-form-wrapper">
+    <div class="dashboard-header">
+        <h2>Registro de Acceso</h2>
+        <div class="icon-group">
+            <div id="settingsDropdown" class="dropdown-menu">
+                <button id="cogButton"><i class="fas fa-cog"></i></button>
+                <div class="dropdown-content">
+                    <button onclick="reportProblem()">Reportar Problema</button>
+                    <button onclick="checkSystemStatus()">Estado del Sistema</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EJS: action y method -->
+    <form id="studentForm" method="POST" action="/alumno/registrar">
+        <h3 class="section-title">1. Verificación</h3>
+
+        <label for="studentCareer">Carrera</label>
+        <select id="studentCareer" name="studentCareer" required></select>
+
+        <label for="studentGroup">Grupo</label>
+        <select id="studentGroup" name="studentGroup" required></select>
+
+        <div id="statusMessage" class="status-disabled">
+            Seleccione sus datos para verificar acceso.
+        </div>
+
+        <h3 class="section-title" id="machineTitle" style="display:none;">2. Datos de Bitácora</h3>
+
+        <div id="registrationContent" class="registration-content">
+            <div class="panel">
+                <h4>Detalles del Usuario</h4>
+
+                <label>Nombre Completo</label>
+                <!-- EJS -->
+                <input type="text" id="studentName" name="studentName" readonly value="<%= user.nombre %>" />
+
+                <label>Matrícula / ID</label>
+                <!-- EJS -->
+                <input type="text" id="studentId" name="studentId" readonly value="<%= user.email %>" />
+
+                <label for="machineNumber">Número de Equipo</label>
+                <select id="machineNumber" name="machineNumber" required></select>
+
+                <label for="observation">Observaciones</label>
+                <textarea id="observation" name="observation"></textarea>
+            </div>
+
+            <div class="panel">
+                <h4>Información de la Sesión</h4>
+                <div class="info-box">Laboratorio: <strong id="infoLab">---</strong></div>
+                <div class="info-box">Docente: <strong id="infoTeacher">---</strong></div>
+                <div class="info-box">Grupo: <strong id="infoGroup">---</strong></div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" id="registerButton" disabled>REGISTRAR ENTRADA</button>
+            <button type="button" class="btn-update" onclick="checkAccess()">Actualizar</button>
+        </div>
+
+        <button type="button" id="logoutButton" onclick="logout()">Cerrar Sesión</button>
+    </form>
+</div>
+
+<script>
+    // TODO TU JS ORIGINAL (SIN BORRAR NADA)
+
+    function logout() {
+        if (confirm("¿Cerrar sesión?")) {
+            window.location.href = "/auth/logout";
+        }
+    }
+
+    document.getElementById('studentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        document.getElementById("studentForm").submit();
+    });
+</script>
+
+</body>
+</html>

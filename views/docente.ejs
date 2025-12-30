@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Laboratorio - Panel Docente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* (Tus estilos se mantienen iguales, son excelentes) */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .dashboard-card { background: #ffffff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 1150px; padding: 35px; position: relative; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #edf2f7; padding-bottom: 15px; }
+        .header h2 { color: #1a365d; font-size: 22px; font-weight: 700; }
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .btn-icon { background: none; border: none; color: #3182ce; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        .btn-icon:hover { color: #2c5282; transform: scale(1.1); }
+        .settings-container { position: relative; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: white; min-width: 200px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 100; border: 1px solid #eee; }
+        .dropdown-menu button { width: 100%; padding: 12px; border: none; background: none; text-align: left; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px; color: #4a5568; }
+        .dropdown-menu button:hover { background: #f8f9fa; color: #3182ce; }
+        .settings-container.active .dropdown-menu { display: block; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 40px; }
+        .section-title { color: #2d3748; font-size: 16px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #20c997; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #718096; margin-bottom: 8px; }
+        .docente-badge { color: #3182ce; font-weight: 700; font-size: 15px; margin-bottom: 15px; display: block; }
+        input, select { width: 100%; padding: 11px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; background: #fcfcfc; color: #4a5568; }
+        input:focus, select:focus { border-color: #3182ce; background: #fff; box-shadow: 0 0 0 3px rgba(49,130,206,0.1); }
+        .time-row { display: flex; gap: 10px; }
+        .btn-primary { background: #20c997; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; width: 62%; text-transform: uppercase; }
+        .btn-save { background: white; color: #3182ce; border: 1px solid #3182ce; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 35%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-logout-card { width: 100%; background: white; color: #e53e3e; border: 1px solid #e53e3e; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 25px; transition: 0.3s; }
+        .btn-primary:hover { background: #17a589; transform: translateY(-1px); }
+        .btn-logout-card:hover { background: #fff5f5; }
+        .table-container { background: #fff; border: 1px solid #edf2f7; border-radius: 8px; overflow: hidden; min-height: 400px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f8fafc; padding: 15px 12px; text-align: left; color: #64748b; font-weight: 600; border-bottom: 1px solid #edf2f7; }
+        td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .status-active { color: #718096; font-size: 12px; font-weight: normal; display: flex; align-items: center; gap: 5px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #48bb78; display: inline-block; }
+        .dot-offline { background: #cbd5e0; }
+        @media (max-width: 950px) { .main-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-card">
+        <header class="header">
+            <h2>Control de Laboratorio - Edificio J</h2>
+            <div class="header-actions">
+                <button class="btn-icon" title="Solicitar Soporte Técnico" onclick="location.href='/personal'">
+                    <i class="fas fa-headset"></i>
+                </button>
+                
+                <div class="settings-container" id="settingsMenu">
+                    <button class="btn-icon" onclick="toggleMenu()"><i class="fas fa-cog"></i></button>
+                    <div class="dropdown-menu">
+                        <button onclick="reportUI()"><i class="fas fa-exclamation-triangle"></i> Reportar Problema</button>
+                        <button onclick="checkSystem()"><i class="fas fa-tachometer-alt"></i> Estado del Sistema</button>
+                        <hr>
+                        <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <section class="config-panel">
+                <h3 class="section-title">1. Configuración del Acceso</h3>
+                
+                <form action="/docente/abrir-clase" method="POST">
+                    <div class="form-group">
+                        <label>Docente Responsable</label>
+                        <span class="docente-badge"><%= user.nombre %></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Carrera</label>
+                        <select name="carrera" required>
+                            <option value="" disabled selected>Seleccione carrera...</option>
+                            <option value="ISC">Ingeniería en Sistemas Computacionales</option>
+                            <option value="IADEV">Ingeniería en Animación Digital</option>
+                            <option value="IIND">Ingeniería Industrial</option>
+                            <option value="IMECA">Ingeniería Mecatrónica</option>
+                            <option value="LGAS">Licenciatura en Gastronomía</option>
+                            <option value="LADM">Licenciatura en Administración</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Laboratorio</label>
+                        <select name="laboratorio" required>
+                            <option value="" disabled selected>Seleccione laboratorio...</option>
+                            <option value="Database">Laboratorio Database</option>
+                            <option value="Multidisciplinario">Laboratorio Multidisciplinario</option>
+                            <option value="Software Development">Software Development</option>
+                            <option value="Network and Comunication">Network and Comunication</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Horario de Clase</label>
+                        <div class="time-row">
+                            <input type="time" name="hora_inicio" required>
+                            <input type="time" name="hora_fin" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Grupo</label>
+                        <select name="grupo" required>
+                            <option value="" disabled selected>Seleccione grupo...</option>
+                            <option value="1ISC11">1ISC11</option>
+                            <option value="4ISC21">4ISC21</option>
+                            <option value="7ISC11">7ISC11</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 25px;">
+                        <button type="submit" class="btn-primary">HABILITAR ACCESO</button>
+                        <button type="button" class="btn-save" onclick="alert('Configuración guardada localmente.')"><i class="fas fa-save"></i> Borrador</button>
+                    </div>
+                </form>
+                
+                <button class="btn-logout-card" onclick="logout()">Cerrar Sesión</button>
+            </section>
+
+            <section class="monitoring-panel">
+                <h3 class="section-title">
+                    2. Monitoreo en Tiempo Real
+                    <span class="status-active" id="systemStatus">
+                        <span class="dot"></span> Activo
+                    </span>
+                </h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Máquina</th>
+                                <th>Estado</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentRealtime">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #a0aec0; padding-top: 150px;">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i><br><br>
+                                    Cargando registros...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    
+
+    <script>
+        // --- FUNCIONES DEL ENGRANE ---
+        function toggleMenu() {
+            document.getElementById('settingsMenu').classList.toggle('active');
+        }
+
+        async function checkSystem() {
+            try {
+                const res = await fetch('/api/estado-sistema');
+                const data = await res.json();
+                alert(`INNOVA SIGET STATUS\n\n✅ Servidor: Activo\n✅ Base de Datos: ${data.database}\n🕒 Servidor: ${new Date(data.timestamp).toLocaleTimeString()}`);
+            } catch (e) {
+                alert('Error: No se pudo contactar al servidor del Edificio J.');
+            }
+        }
+
+        function reportUI() {
+            const msg = prompt("Describa el error en el Panel Docente:");
+            if(msg) alert("Reporte enviado con éxito.");
+        }
+
+        function logout() {
+            if(confirm("¿Cerrar sesión de docente?")) window.location.href = '/logout';
+        }
+
+        // --- MONITOREO EN TIEMPO REAL (AJAX) ---
+        async function updateStudentTable() {
+            try {
+                const response = await fetch('/api/alumnos-activos');
+                const data = await response.json();
+                const tbody = document.getElementById('studentRealtime');
+                const statusLabel = document.getElementById('systemStatus');
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding-top: 100px; color: #a0aec0;">Esperando registros de entrada...</td></tr>`;
+                    statusLabel.innerHTML = `<span class="dot dot-offline"></span> Sin actividad`;
+                    return;
+                }
+
+                statusLabel.innerHTML = `<span class="dot"></span> ${data.length} Alumnos en línea`;
+                
+                tbody.innerHTML = data.map(reg => `
+                    <tr>
+                        <td><strong>${reg.alumno}</strong></td>
+                        <td><span style="background: #edf2f7; padding: 4px 8px; border-radius: 4px;">Máquina ${reg.maquina}</span></td>
+                        <td><span style="color: #48bb78;"><i class="fas fa-check-circle"></i> Registrado</span></td>
+                        <td><small>${reg.observacion || 'Sin fallas'}</small></td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error("Error actualizando tabla:", error);
+            }
+        }
+
+        // Ejecutar actualización cada 30 segundos
+        setInterval(updateStudentTable, 30000);
+        // Cargar por primera vez al abrir
+        updateStudentTable();
+
+        // Cerrar menú al hacer clic fuera
+        window.onclick = function(event) {
+            if (!event.target.closest('.settings-container')) {
+                document.getElementById('settingsMenu').classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

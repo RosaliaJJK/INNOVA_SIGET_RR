@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Técnico - INNOVA SIGET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f4f7f9; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
+        .dashboard-wrapper { background: #ffffff; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.08); width: 100%; max-width: 1150px; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 20px; }
+        .header-info h2 { color: #1a365d; font-size: 24px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+        .header-info p { color: #718096; font-size: 14px; }
+        .main-grid { display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: start; }
+        .sidebar { display: flex; flex-direction: column; gap: 25px; }
+        .resumen-card { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; border-radius: 8px; }
+        .resumen-card h4 { color: #2c5282; font-size: 15px; margin-bottom: 8px; border-bottom: 1px solid #bee3f8; padding-bottom: 4px; }
+        .resumen-card p { font-size: 13px; color: #2a4365; margin: 3px 0; }
+        .section-title { font-size: 15px; font-weight: 700; color: #2d3748; margin-bottom: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 13px; }
+        .btn { border: none; border-radius: 6px; padding: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 13px; transition: 0.3s; }
+        .btn-green { background: #38a169; color: white; }
+        .btn-blue { background: #2b6cb0; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #cbd5e0; color: #4a5568; margin-top: 10px; }
+        .content-area { display: flex; flex-direction: column; gap: 15px; }
+        .table-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f7fafc; padding: 12px; text-align: left; font-size: 12px; color: #4a5568; border-bottom: 2px solid #edf2f7; }
+        td { padding: 12px; font-size: 13px; border-bottom: 1px solid #f7fafc; }
+        tr:hover { background: #f1f7ff; cursor: pointer; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+        .priority-high { color: #e53e3e; font-weight: bold; }
+        @media (max-width: 850px) { .main-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <header class="header">
+        <div class="header-info">
+            <h2><i class="fas fa-tools"></i> Dashboard Técnico</h2>
+            <p>Bienvenido, <%= user ? user.nombre : 'Técnico' %></p>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <aside class="sidebar">
+            <div class="resumen-card">
+                <h4><i class="fas fa-chart-pie"></i> Carga de Trabajo</h4>
+                <p>Total Activos:
+                    <b><%= tickets ? tickets.filter(function(t){ return t.estado !== 'Resuelto' }).length : 0 %></b>
+                </p>
+                <p>Prioridad Alta:
+                    <b><%= tickets ? tickets.filter(function(t){ return t.prioridad === 'Alta' }).length : 0 %></b>
+                </p>
+            </div>
+
+            <section>
+                <h3 class="section-title">Actualizar Ticket</h3>
+                <form action="/mantenimiento/actualizar-estado" method="POST">
+                    <div class="form-group">
+                        <label>Folio Seleccionado</label>
+                        <input type="text" id="inputFolio" name="folio" readonly required
+                               style="background:#edf2f7; font-weight:bold;">
+                    </div>
+                    <div class="form-group">
+                        <label>Cambiar Estado</label>
+                        <select name="estado">
+                            <option>Pendiente</option>
+                            <option>En Proceso</option>
+                            <option>Resuelto</option>
+                            <option>Cancelado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-blue">GUARDAR</button>
+                </form>
+            </section>
+
+            <button class="btn btn-outline" onclick="location.href='/logout'">Cerrar Sesión</button>
+        </aside>
+
+        <main class="content-area">
+            <h3 class="section-title">Cola de Tickets</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Folio</th>
+                            <th>Solicitante</th>
+                            <th>Área</th>
+                            <th>Problema</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    <% if (tickets && tickets.length > 0) { %>
+                        <% tickets.forEach(function(ticket){ %>
+                            <tr onclick="seleccionarTicket(this,'<%= ticket.folio %>')">
+                                <td>#<%= ticket.folio %></td>
+                                <td><%= ticket.nombre_solicitante || 'Personal' %></td>
+                                <td><%= ticket.area %></td>
+                                <td><%= ticket.descripcion ? ticket.descripcion.substring(0,30) : '' %>...</td>
+                                <td class="<%= ticket.prioridad === 'Alta' ? 'priority-high' : '' %>">
+                                    <%= ticket.prioridad %>
+                                </td>
+                                <td><%= ticket.estado %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:30px;">
+                                No hay incidencias registradas
+                            </td>
+                        </tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function seleccionarTicket(row, folio) {
+    document.getElementById("inputFolio").value = folio;
+    document.querySelectorAll("tbody tr").forEach(r => r.style.background = "");
+    row.style.background = "#e6fffa";
+}
+</script>
+
+</body>
+</html>
