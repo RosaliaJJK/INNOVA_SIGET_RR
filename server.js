@@ -31,11 +31,13 @@ app.set('views', path.join(__dirname, 'views'));
    BD
 ========================= */
 const db = mysql.createConnection({
-  host: 'shortline.proxy.rlwy.net',
-  port: 28959,
-  user: 'root',
-  password: 'bnDkixOQGBHdOUbZnrbXsgiePjvfJBxa',
-  database: 'railway'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  waitForConnections: true,
+  //connectionLimit: 10
 });
 
 db.connect(err => {
@@ -70,5 +72,6 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 Servidor corriendo en puerto", PORT);
+  console.log("Servidor corriendo en puerto", PORT);
 });
+
