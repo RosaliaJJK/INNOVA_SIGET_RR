@@ -125,7 +125,7 @@
     </div>
 
     <!-- FORMULARIO -->
-    <form id="studentForm" method="POST" action="/alumno/registrar">
+    <form id="studentForm" method="POST" action="/alumno/conectar">
 
         <h3 class="section-title">1. Verificación</h3>
 
@@ -182,33 +182,6 @@
 
     </form>
 </div>
-
-<!-- JS -->
-▼<!--
-    <script>
-    const cogButton = document.getElementById("cogButton");
-    const menu = document.getElementById("settingsMenu");
-
-    cogButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        menu.style.display = menu.style.display === "block" ? "none" : "block";
-    });
-
-    document.addEventListener("click", () => {
-        menu.style.display = "none";
-    });
-
-    function reportProblem() {
-        window.location.href = "/reportar-problema";
-    }
-
-    function checkSystemStatus() {
-        window.location.href = "/estado-sistema";
-    }
-</script>
-
--->
-
 
 <!-- ======================
      SOCKET.IO (TIEMPO REAL)

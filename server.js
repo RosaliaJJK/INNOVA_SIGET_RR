@@ -5,6 +5,18 @@ const path = require('path');
 
 const app = express();
 
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+const io = new Server(server);
+
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("🟢 Cliente conectado:", socket.id);
+});
+
 /* =========================
    MIDDLEWARES
 ========================= */
@@ -70,8 +82,6 @@ app.get('/', (req, res) => {
    SERVIDOR
 ========================= */
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto", PORT);
+server.listen(PORT, () => {
+  console.log("🚀 Servidor activo en puerto", PORT);
 });
-
