@@ -28,6 +28,16 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 
+db.connect(err => {
+  if (err) console.error('❌ Error MySQL:', err);
+  else console.log('✅ MySQL conectado');
+});
+
+/* 👉 INYECTAR DB */
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
 
 /* =========================
    RUTAS
