@@ -1,23 +1,45 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const { verificarSesion, soloRol } = require("../middlewares/authMiddleware");
 
-/* =========================
-   PROTECCIÓN DE RUTA
-========================= */
-function proteger(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect('/');
+/*
+  MOSTRAR VISTA ALUMNO
+*/
+router.get(
+  "/",
+  verificarSesion,
+  soloRol(["ALUMNO"]),
+  (req, res) => {
+    res.render("alumno", {
+      user: req.session.usuario
+    });
   }
-  next();
-}
+);
 
-/* =========================
-   VISTA ALUMNO
-========================= */
-router.get('/', proteger, (req, res) => {
-  res.render('alumno', {
-    user: req.session.user
-  });
-});
+/*
+  CONECTAR ALUMNO AL TIEMPO REAL
+*/
+router.post(
+  "/conectar",
+  verificarSesion,
+  soloRol(["ALUMNO"]),
+  (req, res) => {
+    const io = req.app.get("io");
+
+    const alumno = {
+      nombre: req.session.usuario.nombre,
+      maquina: req.body.maquina || "N/A",
+      observacion: ""
+    };
+
+    /*
+      ⚠️ Esto luego puede venir de BD
+      Por ahora es un ejemplo simple
+    */
+    io.emit("alumnos_en_linea", [alumno]);
+
+    res.json({ ok: true });
+  }
+);
 
 module.exports = router;

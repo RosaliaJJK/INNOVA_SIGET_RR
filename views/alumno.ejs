@@ -184,7 +184,8 @@
 </div>
 
 <!-- JS -->
-<script>
+▼<!--
+    <script>
     const cogButton = document.getElementById("cogButton");
     const menu = document.getElementById("settingsMenu");
 
@@ -205,6 +206,44 @@
         window.location.href = "/estado-sistema";
     }
 </script>
+
+-->
+
+
+<!-- ======================
+     SOCKET.IO (TIEMPO REAL)
+====================== -->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    /* ===== MENÚ ===== */
+    const cogButton = document.getElementById("cogButton");
+    const menu = document.getElementById("settingsMenu");
+
+    cogButton.onclick = (e) => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    };
+
+    document.onclick = () => menu.style.display = "none";
+
+    /* ===== 🔴 SOCKET.IO ===== */
+    const socket = io();
+
+    const form = document.getElementById("studentForm");
+
+    form.addEventListener("submit", () => {
+        const alumno = {
+            nombre: "<%= user.nombre %>",
+            maquina: document.getElementById("machineNumber").value,
+            observacion: document.getElementById("observation").value
+        };
+
+        // 🔥 AVISA AL SERVIDOR QUE ESTE ALUMNO YA ESTÁ ACTIVO
+        socket.emit("alumno_conectado", alumno);
+    });
+</script>
+
 
 </body>
 </html>
