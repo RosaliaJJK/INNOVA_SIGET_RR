@@ -42,12 +42,18 @@ function detectarRol(email) {
   if (PERSONAL_ADMIN.includes(email)) return 'PERSONAL';
   if (DOCENTES_ESPECIALES.includes(email)) return 'DOCENTE';
 
+  // ALUMNOS: solo números
   if (/^[0-9]{10}@teschi\.edu\.mx$/.test(email)) return 'ALUMNO';
+
+  // DOCENTES: solo letras
   if (/^[a-z]+@teschi\.edu\.mx$/.test(email)) return 'DOCENTE';
+
+  // PERSONAL: letras + números
   if (/^[a-z0-9]+@teschi\.edu\.mx$/.test(email)) return 'PERSONAL';
 
   return null;
 }
+
 
 /* =========================
    REGISTRO
