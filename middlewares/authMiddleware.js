@@ -1,15 +1,22 @@
 function verificarSesion(req, res, next) {
-  if (!req.session.user) {
+  if (!req.session || !req.session.user) {
     return res.redirect("/");
   }
   next();
 }
 
-function soloRol(rol) {
+function soloRol(rolesPermitidos = []) {
   return (req, res, next) => {
-    if (req.session.user.rol !== rol) {
-      return res.send("Acceso no autorizado");
+    if (!req.session.user) {
+      return res.redirect("/");
     }
+
+    const rolUsuario = req.session.user.rol;
+
+    if (!rolesPermitidos.includes(rolUsuario)) {
+      return res.status(403).send("Acceso no autorizado");
+    }
+
     next();
   };
 }
