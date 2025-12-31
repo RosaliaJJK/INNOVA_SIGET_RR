@@ -1,10 +1,7 @@
-require('dotenv').config();
-
 const express = require('express');
+const mysql = require('mysql2');
 const session = require('express-session');
 const path = require('path');
-
-const db = require('./config/db'); // 👈 USAMOS EL POOL
 
 const app = express();
 
@@ -31,17 +28,28 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 /* =========================
-   PROBAR DB
+   BD
 ========================= */
-(async () => {
-  try {
-    const conn = await db.getConnection();
-    console.log('✅ MySQL conectado');
-    conn.release();
-  } catch (err) {
-    console.error('❌ Error MySQL:', err.message);
-  }
-})();
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  waitForConnections: true,
+  //connectionLimit: 10
+});
+
+db.connect(err => {
+  if (err) console.error('❌ Error MySQL:', err);
+  else console.log('✅ MySQL conectado');
+});
+
+/* 👉 INYECTAR DB */
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
 
 /* =========================
    RUTAS
@@ -62,6 +70,8 @@ app.get('/', (req, res) => {
    SERVIDOR
 ========================= */
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log('🚀 Servidor corriendo en puerto', PORT);
+  console.log("Servidor corriendo en puerto", PORT);
 });
+
