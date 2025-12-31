@@ -11,7 +11,7 @@ router.get(
   soloRol(["ALUMNO"]),
   (req, res) => {
     res.render("alumno", {
-      user: req.session.usuario
+      user: req.session.user
     });
   }
 );
@@ -27,7 +27,7 @@ router.post(
     const io = req.app.get("io");
 
     const alumno = {
-      nombre: req.session.usuario.nombre,
+      nombre: req.session.user.nombre,
       maquina: req.body.maquina || "N/A",
       observacion: ""
     };

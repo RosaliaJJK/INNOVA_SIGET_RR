@@ -11,7 +11,7 @@ router.get(
   soloRol(["DOCENTE"]),
   (req, res) => {
     res.render("docente", {
-      user: req.session.usuario
+      user: req.session.user
     });
   }
 );
@@ -32,7 +32,7 @@ router.post(
       laboratorio,
       hora_inicio,
       hora_fin,
-      docente: req.session.usuario.nombre
+      docente: req.session.user.nombre
     });
 
     // Redirige de nuevo al panel
