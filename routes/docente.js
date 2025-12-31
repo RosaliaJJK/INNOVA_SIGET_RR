@@ -32,7 +32,7 @@ router.post(
       laboratorio: req.body.laboratorio,
       hora_inicio: req.body.hora_inicio,
       hora_fin: req.body.hora_fin,
-      docente: req.session.usuario.nombre
+      docente: req.session.user.nombre
     });
 
     // Aquí podrías guardar en la BD que la clase está abierta si quieres
