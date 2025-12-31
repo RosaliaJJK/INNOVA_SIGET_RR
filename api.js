@@ -1,6 +1,6 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
-const { usuarios, resetTokens } = require("../memory/state");
+const { usuarios, resetTokens } = require("./memory/state");
 
 const router = express.Router();
 

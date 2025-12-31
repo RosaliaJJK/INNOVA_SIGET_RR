@@ -41,4 +41,3 @@ router.post(
 );
 
 module.exports = router;
-docente.js
