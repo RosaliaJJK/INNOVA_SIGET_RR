@@ -11,7 +11,7 @@ router.get(
   soloRol(["DOCENTE"]),
   (req, res) => {
     res.render("docente", {
-      user: req.session.usuario
+      user: req.session.user
     });
   }
 );
