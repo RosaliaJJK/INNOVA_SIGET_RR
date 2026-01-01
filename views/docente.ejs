@@ -222,13 +222,13 @@
         }
 
         .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #48bb78;
-            display: inline-block;
-            margin-right: 5px;
-        }
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                display: inline-block;
+                }
+                .green { background: #48bb78; }
+                .red { background: #e53e3e; }
     </style>
 </head>
 
@@ -302,6 +302,9 @@
 <section>
     <h3 class="section-title">
         2. Monitoreo en Tiempo Real
+                <div id="estadoClase">
+        <span class="dot red"></span> Inactivo
+        </div>
         <span style="float:right; font-size:12px;">
             <span class="dot"></span> Activo
         </span>
@@ -334,24 +337,20 @@
 <!-- SOCKET.IO -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    const socket = io();
-    const tbody = document.getElementById("studentRealtime");
+const socket = io();
+const estado = document.getElementById("estadoClase");
 
-    socket.on("alumnos_en_linea", (alumnos) => {
-        if (!alumnos.length) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#a0aec0;padding-top:100px;">Sin alumnos conectados</td></tr>`;
-            return;
-        }
+socket.on("clase_habilitada", () => {
+  estado.innerHTML = `<span class="dot green"></span> Activo`;
+});
 
-        tbody.innerHTML = alumnos.map(a => `
-            <tr>
-                <td><strong>${a.nombre}</strong></td>
-                <td>Máquina ${a.maquina}</td>
-                <td style="color:#48bb78;"><i class="fas fa-check-circle"></i> Activo</td>
-                <td>${a.observacion || 'Sin observaciones'}</td>
-            </tr>
-        `).join("");
-    });
+socket.on("clase_cerrada", () => {
+  estado.innerHTML = `<span class="dot red"></span> Inactivo`;
+});
+
+socket.on("alumnos_en_linea", alumnos => {
+  console.log(alumnos); // luego lo pintamos en tabla
+});
 </script>
 
 </body>

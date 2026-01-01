@@ -19,45 +19,56 @@ router.get(
 /* =========================
    ABRIR CLASE (HABILITAR ACCESO)
 ========================= */
-router.post(
-  "/abrir-clase",
-  verificarSesion,
-  soloRol(["DOCENTE"]),
-  (req, res) => {
-    const io = req.app.get("io");
+router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
+  const io = req.app.get("io");
 
-    // Emitir evento de clase habilitada a todos los clientes
-    io.emit("clase_habilitada", {
-      carrera: req.body.carrera,
-      laboratorio: req.body.laboratorio,
-      hora_inicio: req.body.hora_inicio,
-      hora_fin: req.body.hora_fin,
-      docente: req.session.user.nombre
-    });
+  global.claseActiva = true;
 
-    // Aquí podrías guardar en la BD que la clase está abierta si quieres
+  const infoClase = {
+    carrera: req.body.carrera,
+    laboratorio: req.body.laboratorio,
+    hora_inicio: req.body.hora_inicio,
+    hora_fin: req.body.hora_fin,
+    docente: req.session.user.nombre
+  };
 
-    res.redirect("/docente");
-  }
-);
+  global.infoClase = infoClase;
+
+  io.emit("clase_habilitada", infoClase);
+  res.redirect("/docente");
+});
+
+router.post("/cerrar-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
+  const io = req.app.get("io");
+
+  global.claseActiva = false;
+  global.infoClase = null;
+  global.alumnosConectados = [];
+
+  io.emit("clase_cerrada");
+  res.sendStatus(200);
+});
+
 
 /* =========================
    CERRAR CLASE (DESHABILITAR ACCESO)
 ========================= */
-router.post(
+outer.post(
   "/cerrar-clase",
   verificarSesion,
   soloRol(["DOCENTE"]),
   (req, res) => {
     const io = req.app.get("io");
 
-    // Emitir evento de clase cerrada a todos los clientes
-    io.emit("clase_cerrada");
+    req.app.set("claseActiva", false);
+    req.app.set("infoClase", null);
+    req.app.set("alumnosConectados", []);
 
-    // Aquí podrías actualizar en la BD que la clase está cerrada
+    io.emit("clase_cerrada");
 
     res.sendStatus(200);
   }
 );
+
 
 module.exports = router;

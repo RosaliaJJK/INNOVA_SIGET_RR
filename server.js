@@ -1,3 +1,11 @@
+let claseActiva = false;
+let infoClase = null;
+let alumnosConectados = [];
+
+app.set("claseActiva", claseActiva);
+app.set("infoClase", infoClase);
+app.set("alumnosConectados", alumnosConectados);
+
 const express = require('express');
 const mysql = require('mysql2');
 const session = require('express-session');
@@ -81,6 +89,26 @@ app.get('/', (req, res) => {
 /* =========================
    SERVIDOR
 ========================= */
+io.on("connection", (socket) => {
+  console.log("🟢 Cliente conectado");
+
+  socket.emit("estado_clase", {
+    activa: claseActiva,
+    info: infoClase
+  });
+
+  socket.on("alumno_conectado", (alumno) => {
+    if (!claseActiva) return;
+
+    alumnosConectados.push(alumno);
+    io.emit("alumnos_en_linea", alumnosConectados);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Cliente desconectado");
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
