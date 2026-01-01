@@ -1,51 +1,46 @@
+const express = require("express");
+const mysql = require("mysql2");
+const session = require("express-session");
+const path = require("path");
+const http = require("http");
+const { Server } = require("socket.io");
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+/* =========================
+   ESTADO GLOBAL
+========================= */
 let claseActiva = false;
 let infoClase = null;
 let alumnosConectados = [];
 
-app.set("claseActiva", claseActiva);
-app.set("infoClase", infoClase);
-app.set("alumnosConectados", alumnosConectados);
-
-const express = require('express');
-const mysql = require('mysql2');
-const session = require('express-session');
-const path = require('path');
-
-const app = express();
-
-const http = require("http");
-const { Server } = require("socket.io");
-
-const server = http.createServer(app);
-const io = new Server(server);
-
 app.set("io", io);
-
-io.on("connection", (socket) => {
-  console.log("🟢 Cliente conectado:", socket.id);
-});
 
 /* =========================
    MIDDLEWARES
 ========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 /* =========================
    SESIONES
 ========================= */
-app.use(session({
-  secret: 'innova_siget_secret',
-  resave: false,
-  saveUninitialized: false
-}));
+app.use(
+  session({
+    secret: "innova_siget_secret",
+    resave: false,
+    saveUninitialized: false
+  })
+);
 
 /* =========================
    VISTAS
 ========================= */
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 /* =========================
    BD
@@ -56,16 +51,13 @@ const db = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT
-  //waitForConnections: true,
-  //connectionLimit: 10
 });
 
 db.connect(err => {
-  if (err) console.error('❌ Error MySQL:', err);
-  else console.log('✅ MySQL conectado');
+  if (err) console.error("❌ Error MySQL:", err);
+  else console.log("✅ MySQL conectado");
 });
 
-/* 👉 INYECTAR DB */
 app.use((req, res, next) => {
   req.db = db;
   next();
@@ -74,30 +66,27 @@ app.use((req, res, next) => {
 /* =========================
    RUTAS
 ========================= */
-app.use('/auth', require('./routes/auth'));
-app.use('/alumno', require('./routes/alumno'));
-app.use('/docente', require('./routes/docente'));
-app.use('/personal', require('./routes/personal'));
+app.use("/auth", require("./routes/auth"));
+app.use("/alumno", require("./routes/alumno"));
+app.use("/docente", require("./routes/docente"));
+app.use("/personal", require("./routes/personal"));
 
-/* =========================
-   LOGIN
-========================= */
-app.get('/', (req, res) => {
-  res.render('login');
+app.get("/", (req, res) => {
+  res.render("login");
 });
 
 /* =========================
-   SERVIDOR
+   SOCKET.IO
 ========================= */
-io.on("connection", (socket) => {
-  console.log("🟢 Cliente conectado");
+io.on("connection", socket => {
+  console.log("🟢 Cliente conectado:", socket.id);
 
   socket.emit("estado_clase", {
     activa: claseActiva,
     info: infoClase
   });
 
-  socket.on("alumno_conectado", (alumno) => {
+  socket.on("alumno_conectado", alumno => {
     if (!claseActiva) return;
 
     alumnosConectados.push(alumno);
@@ -109,9 +98,10 @@ io.on("connection", (socket) => {
   });
 });
 
+/* =========================
+   SERVIDOR
+========================= */
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto", PORT);
+server.listen(PORT, () => {
+  console.log("🚀 Servidor corriendo en puerto", PORT);
 });
-

@@ -5,19 +5,14 @@ const { verificarSesion, soloRol } = require("../middlewares/authMiddleware");
 /* =========================
    MOSTRAR VISTA DOCENTE
 ========================= */
-router.get(
-  "/",
-  verificarSesion,
-  soloRol(["DOCENTE"]),
-  (req, res) => {
-    res.render("docente", {
-      user: req.session.user
-    });
-  }
-);
+router.get("/", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
+  res.render("docente", {
+    user: req.session.user
+  });
+});
 
 /* =========================
-   ABRIR CLASE (HABILITAR ACCESO)
+   ABRIR CLASE
 ========================= */
 router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
   const io = req.app.get("io");
@@ -33,11 +28,15 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
   };
 
   global.infoClase = infoClase;
+  global.alumnosConectados = [];
 
   io.emit("clase_habilitada", infoClase);
   res.redirect("/docente");
 });
 
+/* =========================
+   CERRAR CLASE
+========================= */
 router.post("/cerrar-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
   const io = req.app.get("io");
 
@@ -48,27 +47,5 @@ router.post("/cerrar-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =
   io.emit("clase_cerrada");
   res.sendStatus(200);
 });
-
-
-/* =========================
-   CERRAR CLASE (DESHABILITAR ACCESO)
-========================= */
-outer.post(
-  "/cerrar-clase",
-  verificarSesion,
-  soloRol(["DOCENTE"]),
-  (req, res) => {
-    const io = req.app.get("io");
-
-    req.app.set("claseActiva", false);
-    req.app.set("infoClase", null);
-    req.app.set("alumnosConectados", []);
-
-    io.emit("clase_cerrada");
-
-    res.sendStatus(200);
-  }
-);
-
 
 module.exports = router;

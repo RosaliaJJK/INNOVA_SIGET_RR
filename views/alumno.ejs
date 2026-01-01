@@ -135,63 +135,64 @@
 
     <!-- FORMULARIO -->
      <div id="bitacora" class="disabled"></div>
-    <form id="studentForm" method="POST" action="/alumno/conectar">
 
-        <h3 class="section-title">1. Verificación</h3>
+        <form id="studentForm" method="POST" action="/alumno/conectar">
 
-        <label for="studentCareer">Carrera</label>
-        <select id="studentCareer" name="studentCareer" required></select>
+            <h3 class="section-title">1. Verificación</h3>
 
-        <label for="studentGroup">Grupo</label>
-        <select id="studentGroup" name="studentGroup" required></select>
+            <label for="studentCareer">Carrera</label>
+            <select id="studentCareer" name="studentCareer" required></select>
 
-        <div id="statusMessage" class="status-disabled">
-            Seleccione sus datos para verificar acceso.
-        </div>
+            <label for="studentGroup">Grupo</label>
+            <select id="studentGroup" name="studentGroup" required></select>
 
-        <h3 class="section-title" id="machineTitle" style="display:none;">
-            2. Datos de Bitácora
-        </h3>
-
-        <div id="registrationContent" class="registration-content">
-
-            <div class="panel">
-                <h4>Detalles del Usuario</h4>
-
-                <label>Nombre Completo</label>
-                <input type="text" readonly value="<%= user.nombre %>">
-
-                <label>Matrícula / ID</label>
-                <input type="text" readonly value="<%= user.email %>">
-
-                <label for="machineNumber">Número de Equipo</label>
-                <select id="machineNumber" name="machineNumber" required></select>
-
-                <label for="observation">Observaciones</label>
-                <textarea id="observation" name="observation"></textarea>
+            <div id="statusMessage" class="status-disabled">
+                Seleccione sus datos para verificar acceso.
             </div>
 
-            <div class="panel">
-                <h4>Información de la Sesión</h4>
-                <div class="info-box">Laboratorio: <strong id="infoLab">---</strong></div>
-                <div class="info-box">Docente: <strong id="infoTeacher">---</strong></div>
-                <div class="info-box">Grupo: <strong id="infoGroup">---</strong></div>
+            <h3 class="section-title" id="machineTitle" style="display:none;">
+                2. Datos de Bitácora
+            </h3>
+
+            <div id="registrationContent" class="registration-content">
+
+                <div class="panel">
+                    <h4>Detalles del Usuario</h4>
+
+                    <label>Nombre Completo</label>
+                    <input type="text" readonly value="<%= user.nombre %>">
+
+                    <label>Matrícula / ID</label>
+                    <input type="text" readonly value="<%= user.email %>">
+
+                    <label for="machineNumber">Número de Equipo</label>
+                    <select id="machineNumber" name="machineNumber" required></select>
+
+                    <label for="observation">Observaciones</label>
+                    <textarea id="observation" name="observation"></textarea>
+                </div>
+
+                <div class="panel">
+                    <h4>Información de la Sesión</h4>
+                    <div class="info-box">Laboratorio: <strong id="infoLab">---</strong></div>
+                    <div class="info-box">Docente: <strong id="infoTeacher">---</strong></div>
+                    <div class="info-box">Grupo: <strong id="infoGroup">---</strong></div>
+                </div>
+
             </div>
 
-        </div>
+            <div class="btn-group">
+                <button type="submit" id="registerButton" disabled>
+                    REGISTRAR ENTRADA
+                </button>
 
-        <div class="btn-group">
-            <button type="submit" id="registerButton" disabled>
-                REGISTRAR ENTRADA
-            </button>
+                <button type="button" class="btn-update" onclick="checkAccess()">
+                    Actualizar
+                </button>
+            </div>
 
-            <button type="button" class="btn-update" onclick="checkAccess()">
-                Actualizar
-            </button>
-        </div>
-
-    </form>
-</div>
+        </form>
+    </div>
 </div>
 
 
