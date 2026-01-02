@@ -3,20 +3,57 @@ const mysql = require("mysql2");
 const session = require("express-session");
 const path = require("path");
 const http = require("http");
-const { Server } = require("socket.io");
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 
 /* =========================
-   ESTADO GLOBAL
+   APP
 ========================= */
-let claseActiva = false;
-let infoClase = null;
-let alumnosConectados = [];
+const app = express();
 
+/* =========================
+   BD
+========================= */
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
+});
+
+db.getConnection(err => {
+  if (err) console.error("❌ Error MySQL:", err);
+  else console.log("✅ MySQL conectado");
+});
+
+// Guardar DB en app
+app.set("db", db);
+
+/* =========================
+   SERVER + SOCKET
+========================= */
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+// Guardar io en app
 app.set("io", io);
+
+/* =========================
+   CIERRE AUTOMÁTICO ⏰
+========================= */
+setInterval(() => {
+  db.query(
+    `UPDATE clases_activas 
+     SET estatus='CERRADA'
+     WHERE estatus='ABIERTA'
+     AND hora_fin < CURTIME()`,
+    err => {
+      if (!err) {
+        io.emit("clase_cerrada");
+      }
+    }
+  );
+}, 60000);
 
 /* =========================
    MIDDLEWARES
@@ -25,9 +62,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-/* =========================
-   SESIONES
-========================= */
 app.use(
   session({
     secret: "innova_siget_secret",
@@ -43,21 +77,8 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 /* =========================
-   BD
+   INYECTAR DB EN REQ
 ========================= */
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT
-});
-
-db.connect(err => {
-  if (err) console.error("❌ Error MySQL:", err);
-  else console.log("✅ MySQL conectado");
-});
-
 app.use((req, res, next) => {
   req.db = db;
   next();
@@ -79,20 +100,18 @@ app.get("/", (req, res) => {
    SOCKET.IO
 ========================= */
 io.on("connection", socket => {
-  console.log("🟢 Cliente conectado:", socket.id);
-
-  // 🔥 ESTADO REAL DE LA CLASE
-  socket.emit("estado_clase", {
-    activa: global.claseActiva,
-    info: global.infoClase
-  });
-
-  socket.on("alumno_conectado", alumno => {
-    if (!global.claseActiva) return;
-
-    global.alumnosConectados.push(alumno);
-    io.emit("alumnos_en_linea", global.alumnosConectados);
-  });
+  db.query(
+    `SELECT * FROM clases_activas 
+     WHERE estatus='ABIERTA' 
+     ORDER BY id DESC LIMIT 1`,
+    (err, rows) => {
+      if (rows.length > 0) {
+        socket.emit("clase_activada", rows[0]);
+      } else {
+        socket.emit("clase_cerrada");
+      }
+    }
+  );
 });
 
 /* =========================

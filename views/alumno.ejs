@@ -135,7 +135,6 @@
 
     <!-- FORMULARIO -->
      <div id="bitacora" class="disabled"></div>
-
         <form id="studentForm" method="POST" action="/alumno/conectar">
 
             <h3 class="section-title">1. Verificación</h3>
@@ -235,19 +234,32 @@
 
 -->
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const socket = io();
-const bitacora = document.getElementById("bitacora");
+    <script>
+        const socket = io();
+        const bitacora = document.getElementById("registrationContent");
+        const btn = document.getElementById("registerButton");
 
-socket.on("clase_habilitada", () => {
-  bitacora.classList.remove("disabled");
-});
+        socket.on("estado_clase", data => {
+        if (data.activa) {
+            bitacora.classList.remove("disabled");
+            btn.disabled = false;
+        } else {
+            bitacora.classList.add("disabled");
+            btn.disabled = true;
+        }
+        });
 
-socket.on("clase_cerrada", () => {
-  bitacora.classList.add("disabled");
-});
-</script>
+        socket.on("clase_habilitada", () => {
+            bitacora.classList.remove("disabled");
+            btn.disabled = false;
+        });
+
+        socket.on("clase_cerrada", () => {
+            bitacora.classList.add("disabled");
+            btn.disabled = true;
+        });
+    </script>
+
 
 </body>
 </html>

@@ -15,24 +15,38 @@ router.get("/", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
    ABRIR CLASE
 ========================= */
 router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) => {
-  const io = req.app.get("io");
+  const db = req.db;
+  const { carrera, laboratorio, hora_inicio, hora_fin } = req.body;
+  const docenteId = req.session.user.id;
 
-  global.claseActiva = true;
+  // Verificar si ya hay clase abierta
+  db.query(
+    `SELECT id FROM clases_activas 
+     WHERE laboratorio = ? AND estatus = 'ABIERTA'`,
+    [laboratorio],
+    (err, rows) => {
+      if (rows.length > 0) {
+        return res.send("Este laboratorio ya está activo");
+      }
 
-  const infoClase = {
-    carrera: req.body.carrera,
-    laboratorio: req.body.laboratorio,
-    hora_inicio: req.body.hora_inicio,
-    hora_fin: req.body.hora_fin,
-    docente: req.session.user.nombre
-  };
+      db.query(
+        `INSERT INTO clases_activas
+        (id_docente, carrera, laboratorio, hora_inicio, hora_fin, fecha_apertura)
+        VALUES (?, ?, ?, ?, ?, CURDATE())`,
+        [docenteId, carrera, laboratorio, hora_inicio, hora_fin],
+        err => {
+          if (err) return res.status(500).send("Error BD");
 
-  global.infoClase = infoClase;
-  global.alumnosConectados = [];
+          const io = req.app.get("io");
+          io.emit("clase_activada", { laboratorio });
 
-  io.emit("clase_habilitada", infoClase);
-  res.redirect("/docente");
+          res.redirect("/docente");
+        }
+      );
+    }
+  );
 });
+
 
 /* =========================
    CERRAR CLASE

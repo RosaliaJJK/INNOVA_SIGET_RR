@@ -382,31 +382,36 @@
 </div>
 </div>
 
-<!-- SOCKET.IO -->
-    <script>
-        const estado = document.getElementById("estadoClase");
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const estado = document.getElementById("estadoClase");
+  const tbody = document.getElementById("studentRealtime");
 
-        function activarEstado() {
-        estado.classList.remove("inactivo");
-        estado.classList.add("activo");
-        estado.querySelector(".texto").textContent = "Activo";
-        }
+socket.on("nuevo_registro", data => {
+  tbody.innerHTML += `
+    <tr>
+      <td>${data.alumno}</td>
+      <td>${data.maquina}</td>
+      <td><span class="dot green"></span> Activo</td>
+      <td>${data.observacion || ""}</td>
+    </tr>
+  `;
+});
 
-        function desactivarEstado() {
-        estado.classList.remove("activo");
-        estado.classList.add("inactivo");
-        estado.querySelector(".texto").textContent = "Inactivo";
-        }
 
-        socket.on("estado_clase", data => {
-        if (data.activa) activarEstado();
-        else desactivarEstado();
-        });
+  socket.on("clase_activada", () => {
+    estado.classList.remove("inactivo");
+    estado.classList.add("activo");
+    estado.querySelector(".texto").textContent = "Activo";
+  });
 
-        socket.on("clase_habilitada", activarEstado);
-        socket.on("clase_cerrada", desactivarEstado);
-    </script>
-
+  socket.on("clase_cerrada", () => {
+    estado.classList.remove("activo");
+    estado.classList.add("inactivo");
+    estado.querySelector(".texto").textContent = "Inactivo";
+  });
+</script>
 
 </body>
 </html>
