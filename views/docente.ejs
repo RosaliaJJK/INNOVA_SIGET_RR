@@ -303,7 +303,6 @@
     <h3 class="section-title">
         2. Monitoreo en Tiempo Real
                 <div id="estadoClase">
-        <span class="dot red"></span> Inactivo
         </div>
         <span style="float:right; font-size:12px;">
             <span class="dot"></span> Activo
@@ -335,10 +334,17 @@
 </div>
 
 <!-- SOCKET.IO -->
-<script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
 const estado = document.getElementById("estadoClase");
+
+socket.on("estado_clase", data => {
+  if (data.activa) {
+    estado.innerHTML = `<span class="dot green"></span> Activo`;
+  } else {
+    estado.innerHTML = `<span class="dot red"></span> Inactivo`;
+  }
+});
 
 socket.on("clase_habilitada", () => {
   estado.innerHTML = `<span class="dot green"></span> Activo`;
@@ -347,11 +353,8 @@ socket.on("clase_habilitada", () => {
 socket.on("clase_cerrada", () => {
   estado.innerHTML = `<span class="dot red"></span> Inactivo`;
 });
-
-socket.on("alumnos_en_linea", alumnos => {
-  console.log(alumnos); // luego lo pintamos en tabla
-});
 </script>
+
 
 </body>
 </html>

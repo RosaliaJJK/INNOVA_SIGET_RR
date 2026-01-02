@@ -81,20 +81,17 @@ app.get("/", (req, res) => {
 io.on("connection", socket => {
   console.log("🟢 Cliente conectado:", socket.id);
 
+  // 🔥 ESTADO REAL DE LA CLASE
   socket.emit("estado_clase", {
-    activa: claseActiva,
-    info: infoClase
+    activa: global.claseActiva,
+    info: global.infoClase
   });
 
   socket.on("alumno_conectado", alumno => {
-    if (!claseActiva) return;
+    if (!global.claseActiva) return;
 
-    alumnosConectados.push(alumno);
-    io.emit("alumnos_en_linea", alumnosConectados);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("🔴 Cliente desconectado");
+    global.alumnosConectados.push(alumno);
+    io.emit("alumnos_en_linea", global.alumnosConectados);
   });
 });
 
