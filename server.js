@@ -102,26 +102,17 @@ app.get("/", (req, res) => {
 ========================= */
 io.on("connection", socket => {
   db.query(
-    `SELECT c.*, z.nombre AS laboratorio
-     FROM clases c
-     JOIN zonas z ON c.id_zona = z.id
-     WHERE c.estado = 'ACTIVA'
-     ORDER BY c.id DESC
-     LIMIT 1`,
+    `SELECT id FROM clases WHERE estado='ACTIVA' LIMIT 1`,
     (err, rows) => {
-      if (err) {
-        console.error("❌ Error consulta socket:", err);
-        return;
-      }
+      if (err) return;
 
-      if (rows.length > 0) {
-        socket.emit("clase_activada", rows[0]);
-      } else {
-        socket.emit("clase_cerrada");
-      }
+      socket.emit("estado_clase", {
+        activa: rows.length > 0
+      });
     }
   );
 });
+
 
 /* ========================
    SERVIDOR
