@@ -101,18 +101,27 @@ app.get("/", (req, res) => {
 ========================= */
 io.on("connection", socket => {
   db.query(
-    `SELECT * FROM clases_activas 
-     WHERE estatus='ABIERTA' 
-     ORDER BY id DESC LIMIT 1`,
+    "SELECT * FROM clases_activas WHERE estatus='ABIERTA' ORDER BY id DESC LIMIT 1",
     (err, rows) => {
+      if (err) {
+        console.error("❌ Error consulta:", err);
+        return;
+      }
+
       if (rows.length > 0) {
-        socket.emit("clase_activada", rows[0]);
+        socket.emit("estado_clase", {
+          activa: true,
+          info: rows[0]
+        });
       } else {
-        socket.emit("clase_cerrada");
+        socket.emit("estado_clase", {
+          activa: false
+        });
       }
     }
   );
 });
+
 
 /* =========================
    SERVIDOR
