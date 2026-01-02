@@ -17,6 +17,36 @@ router.get('/logout', (req, res) => {
 ========================= */
 const PERSONAL_ADMIN = [
   'direccion@teschi.edu.mx',
+  'direcciondeplaneacionyvinculacion@teschi.edu.mx',
+  'direccionacademica@teschi.edu.mx',
+  'posgradoeinvestigacion@teschi.edu.mx',
+  'subvinculacion@teschi.edu.mx',
+  'subservicios@teschi.edu.mx',
+  'subdireccionplaneacion@teschi.edu.mx',
+  'ingenieria@teschi.edu.mx',
+  'ing.quimica@teschi.edu.mx',
+  'animaciondigital@teschi.edu.mx',
+  'sistemasteschi@teschi.edu.mx',
+  'licadministracion@teschi.edu.mx',
+  'departamentoposgradoinvestigacion@teschi.edu.mx',
+  'serviciosocial@teschi.edu.mx',
+  'departamentovinculacion@teschi.edu.mx',
+  'evaluacion@teschi.edu.mx',
+  'planeacion@teschi.edu.mx',
+  'recursosmateriales@teschi.edu.mx',
+  'recursosfinancieros@teschi.edu.mx',
+  'recursoshumanos@teschi.edu.mx',
+  'desarrolloacademico@teschi.edu.mx',
+  'area.juridica@teschi.edu.mx',
+  'ing_mecatronica@teschi.edu.mx',
+  'gastronomia@teschi.edu.mx',
+  'controlescolar@teschi.edu.mx',
+  'subacademica@teschi.edu.mx',
+  'difusion@teschi.edu.mx',
+  'oic@teschi.edu.mx',
+  'centrodeidiomas@teschi.edu.mx',
+  'incubadoradeempresas@teschi.edu.mx',
+  'sutaateschi@teschi.edu.mx',
   'personalinnova013@gmail.com'
 ];
 
@@ -60,7 +90,7 @@ function detectarRol(email) {
   if (PERSONAL_ADMIN.includes(email)) return 'PERSONAL';
   if (DOCENTES_LISTA_BLANCA.includes(email)) return 'DOCENTE';
 
-  // detección automática
+  // respaldo automático
   if (/^[0-9]{10}@teschi\.edu\.mx$/.test(email)) return 'ALUMNO';
   if (/^[a-z]+@teschi\.edu\.mx$/.test(email)) return 'DOCENTE';
   if (/^[a-z0-9._]+@teschi\.edu\.mx$/.test(email)) return 'PERSONAL';
@@ -130,7 +160,7 @@ router.post('/register', async (req, res) => {
             <script>
               alert('Error al registrar usuario');
               window.location = '/';
-            </script>
+            </cript>
           `);
         }
 
