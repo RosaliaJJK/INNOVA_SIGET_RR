@@ -19,42 +19,43 @@ router.post(
   verificarSesion,
   soloRol(["DOCENTE"]),
   (req, res) => {
+
     const db = req.db;
     const { carrera, laboratorio, hora_inicio, hora_fin } = req.body;
     const docenteId = req.session.user.id;
 
-    // Verificar si ya hay clase abierta
+    // 1️⃣ Verificar si la zona ya tiene clase ACTIVA
     db.query(
-      `SELECT id FROM clases_activas 
-       WHERE laboratorio = ? AND estatus = 'ABIERTA'`,
+      `SELECT id FROM clases 
+       WHERE id_zona = ? AND estado = 'ACTIVA'`,
       [laboratorio],
       (err, rows) => {
 
-        // 🔴 PRIMERO manejar error
         if (err) {
-          console.error("❌ Error al verificar clase activa:", err);
-          return res.status(500).send("Error al verificar clase activa");
+          console.error("❌ Error al verificar clase:", err);
+          return res.status(500).send("Error al verificar clase");
         }
 
-        // 🟢 AHORA sí usar rows
         if (rows.length > 0) {
-          return res.send("Este laboratorio ya está activo");
+          return res.send("Este laboratorio ya tiene una clase activa");
         }
 
-        // ⬇️ CONTINÚA INSERCIÓN
+        // 2️⃣ Insertar nueva clase
         db.query(
-          `INSERT INTO clases_activas
-          (id_docente, carrera, laboratorio, hora_inicio, hora_fin, fecha_apertura, estatus)
-          VALUES (?, ?, ?, ?, ?, CURDATE(), 'ABIERTA')`,
-          [docenteId, carrera, laboratorio, hora_inicio, hora_fin],
+          `INSERT INTO clases
+          (id_docente, id_zona, carrera, hora_inicio, hora_fin, fecha, estado)
+          VALUES (?, ?, ?, ?, ?, CURDATE(), 'ACTIVA')`,
+          [docenteId, laboratorio, carrera, hora_inicio, hora_fin],
           err => {
+
             if (err) {
               console.error("❌ Error al abrir clase:", err);
               return res.status(500).send("Error al abrir clase");
             }
 
+            // 3️⃣ Emitir evento socket
             const io = req.app.get("io");
-            io.emit("clase_activada", { laboratorio });
+            io.emit("clase_activada");
 
             res.redirect("/docente");
           }
@@ -62,7 +63,7 @@ router.post(
       }
     );
   }
-); // ✅ ESTE CIERRE FALTABA
+);
 
 /* =========================
    CERRAR CLASE

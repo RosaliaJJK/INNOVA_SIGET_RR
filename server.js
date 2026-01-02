@@ -43,9 +43,9 @@ app.set("io", io);
 ========================= */
 setInterval(() => {
   db.query(
-    `UPDATE clases_activas 
-     SET estatus='CERRADA'
-     WHERE estatus='ABIERTA'
+    `UPDATE clases
+     SET estado = 'CERRADA'
+     WHERE estado = 'ACTIVA'
      AND hora_fin < CURTIME()`,
     err => {
       if (!err) {
@@ -54,6 +54,7 @@ setInterval(() => {
     }
   );
 }, 60000);
+
 
 /* =========================
    MIDDLEWARES
@@ -101,26 +102,27 @@ app.get("/", (req, res) => {
 ========================= */
 io.on("connection", socket => {
   db.query(
-    "SELECT * FROM clases_activas WHERE estatus='ABIERTA' ORDER BY id DESC LIMIT 1",
+    `SELECT c.*, z.nombre AS laboratorio
+     FROM clases c
+     JOIN zonas z ON c.id_zona = z.id
+     WHERE c.estado = 'ACTIVA'
+     ORDER BY c.id DESC
+     LIMIT 1`,
     (err, rows) => {
       if (err) {
-        console.error("❌ Error consulta:", err);
+        console.error("❌ Error consulta socket:", err);
         return;
       }
 
       if (rows.length > 0) {
-        socket.emit("estado_clase", {
-          activa: true,
-          info: rows[0]
-        });
+        socket.emit("clase_activada", rows[0]);
       } else {
-        socket.emit("estado_clase", {
-          activa: false
-        });
+        socket.emit("clase_cerrada");
       }
     }
   );
 });
+
 /* ========================
    SERVIDOR
 ========================= */
