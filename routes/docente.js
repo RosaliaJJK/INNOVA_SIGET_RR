@@ -19,18 +19,23 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
   const { carrera, laboratorio, hora_inicio, hora_fin } = req.body;
   const docenteId = req.session.user.id;
 
-  // 🔍 Verificar si ya hay clase activa en ese laboratorio (zona)
+  const idZona = parseInt(laboratorio);
+
+  if (isNaN(idZona)) {
+    return res.status(400).send("Laboratorio inválido");
+  }
+
+  // 🔍 Verificar si ya hay clase activa
   db.query(
-    `SELECT id FROM clases 
-     WHERE id_zona = ? AND estado = 'ACTIVA'`,
-    [laboratorio],
+    `SELECT id FROM clases WHERE id_zona = ? AND estado = 'ACTIVA'`,
+    [idZona],
     (err, rows) => {
       if (err) {
-        console.error("❌ Error al verificar clase:", err);
+        console.error("❌ Error al verificar clase:", err.sqlMessage);
         return res.status(500).send("Error al verificar clase activa");
       }
 
-      if (rows.length > 0) {
+      if (rows && rows.length > 0) {
         return res.send("Este laboratorio ya tiene una clase activa");
       }
 
@@ -39,15 +44,15 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
         `INSERT INTO clases 
          (id_docente, id_zona, carrera, hora_inicio, hora_fin, fecha, estado)
          VALUES (?, ?, ?, ?, ?, CURDATE(), 'ACTIVA')`,
-        [docenteId, laboratorio, carrera, hora_inicio, hora_fin],
+        [docenteId, idZona, carrera, hora_inicio, hora_fin],
         err => {
           if (err) {
-            console.error("❌ Error al abrir clase:", err);
+            console.error("❌ Error al abrir clase:", err.sqlMessage);
             return res.status(500).send("Error al abrir la clase");
           }
 
           const io = req.app.get("io");
-          io.emit("clase_activada");
+          io.emit("clase_activada", { idZona });
 
           res.redirect("/docente");
         }
@@ -66,9 +71,12 @@ router.post("/cerrar-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =
   db.query(
     `UPDATE clases SET estado='CERRADA' WHERE estado='ACTIVA'`,
     err => {
-      if (!err) {
-        io.emit("clase_cerrada");
+      if (err) {
+        console.error("❌ Error al cerrar clase:", err.sqlMessage);
+        return res.status(500).send("Error al cerrar clase");
       }
+
+      io.emit("clase_cerrada");
       res.sendStatus(200);
     }
   );
