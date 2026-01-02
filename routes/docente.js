@@ -19,7 +19,7 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
   const { carrera, laboratorio, hora_inicio, hora_fin } = req.body;
   const docenteId = req.session.user.id;
 
-  // 1️⃣ Verificar si ya hay clase ACTIVA en ese laboratorio
+  // 🔍 Verificar si ya hay clase activa en ese laboratorio (zona)
   db.query(
     `SELECT id FROM clases 
      WHERE id_zona = ? AND estado = 'ACTIVA'`,
@@ -34,11 +34,11 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
         return res.send("Este laboratorio ya tiene una clase activa");
       }
 
-      // 2️⃣ Crear nueva clase
+      // ✅ Insertar nueva clase
       db.query(
         `INSERT INTO clases 
-        (id_docente, id_zona, carrera, hora_inicio, hora_fin, fecha, estado)
-        VALUES (?, ?, ?, ?, ?, CURDATE(), 'ACTIVA')`,
+         (id_docente, id_zona, carrera, hora_inicio, hora_fin, fecha, estado)
+         VALUES (?, ?, ?, ?, ?, CURDATE(), 'ACTIVA')`,
         [docenteId, laboratorio, carrera, hora_inicio, hora_fin],
         err => {
           if (err) {
@@ -64,9 +64,7 @@ router.post("/cerrar-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =
   const io = req.app.get("io");
 
   db.query(
-    `UPDATE clases 
-     SET estado = 'CERRADA' 
-     WHERE estado = 'ACTIVA'`,
+    `UPDATE clases SET estado='CERRADA' WHERE estado='ACTIVA'`,
     err => {
       if (!err) {
         io.emit("clase_cerrada");
