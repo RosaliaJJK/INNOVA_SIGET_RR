@@ -2,18 +2,15 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 
+/* =========================
+   LOGOUT
+========================= */
 router.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Error al cerrar sesión:', err);
-      return res.redirect('/');
-    }
-
+  req.session.destroy(() => {
     res.clearCookie('connect.sid');
     res.redirect('/');
   });
 });
-
 
 /* =========================
    LISTAS BLANCAS
@@ -28,8 +25,29 @@ const MANTENIMIENTO = [
   'mantenimientoinnova088@gmail.com'
 ];
 
-const DOCENTES_ESPECIALES = [
-  'docenteinnova074@gmail.com'
+const DOCENTES_LISTA_BLANCA = [
+  'docenteinnova074@gmail.com',
+  'guillermovarela@teschi.edu.mx',
+  'mario_montiel@teschi.edu.mx',
+  'juliomendez@teschi.edu.mx',
+  'juanalbertoramirez@teschi.edu.mx',
+  'josemartinez@teschi.edu.mx',
+  'renevictorinolopez@teschi.edu.mx',
+  'luciotun@teschi.edu.mx',
+  'bernardinosanchez@teschi.edu.mx',
+  'nicolastrejo@teschi.edu.mx',
+  'marcollinas@teschi.edu.mx',
+  'jose_hernandez_santiago@teschi.edu.mx',
+  'adriangarduno@teschi.edu.mx',
+  'allangomez@teschi.edu.mx',
+  'sharonsolis@teschi.edu.mx',
+  'anuarmalcon@teschi.edu.mx',
+  'gumesindoflores@teschi.edu.mx',
+  'alejandrojavierrivera@teschi.edu.mx',
+  'heribertoflores@teschi.edu.mx',
+  'zitaalvarez@teschi.edu.mx',
+  'abrahamjorge@teschi.edu.mx',
+  'yolandacastro@teschi.edu.mx'
 ];
 
 /* =========================
@@ -40,38 +58,57 @@ function detectarRol(email) {
 
   if (MANTENIMIENTO.includes(email)) return 'TECNICO';
   if (PERSONAL_ADMIN.includes(email)) return 'PERSONAL';
-  if (DOCENTES_ESPECIALES.includes(email)) return 'DOCENTE';
+  if (DOCENTES_LISTA_BLANCA.includes(email)) return 'DOCENTE';
 
-  // ALUMNOS: solo números
+  // detección automática
   if (/^[0-9]{10}@teschi\.edu\.mx$/.test(email)) return 'ALUMNO';
-
-  // DOCENTES: solo letras
   if (/^[a-z]+@teschi\.edu\.mx$/.test(email)) return 'DOCENTE';
-
-  // PERSONAL: letras + números
-  if (/^[a-z0-9]+@teschi\.edu\.mx$/.test(email)) return 'PERSONAL';
+  if (/^[a-z0-9._]+@teschi\.edu\.mx$/.test(email)) return 'PERSONAL';
 
   return null;
 }
 
+/* =========================
+   VALIDACIÓN CONTRASEÑA
+========================= */
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
 
 /* =========================
    REGISTRO
 ========================= */
 router.post('/register', async (req, res) => {
+  const { nombre, email, password } = req.body;
+  const db = req.db;
+
+  if (!nombre || !email || !password) {
+    return res.send(`
+      <script>
+        alert('Todos los campos son obligatorios');
+        window.location = '/';
+      </script>
+    `);
+  }
+
+  const rol = detectarRol(email);
+  if (!rol) {
+    return res.send(`
+      <script>
+        alert('Correo institucional no autorizado');
+        window.location = '/';
+      </script>
+    `);
+  }
+
+  if (!PASSWORD_REGEX.test(password)) {
+    return res.send(`
+      <script>
+        alert('La contraseña debe tener mínimo 6 caracteres, una mayúscula, un número y un símbolo');
+        window.location = '/';
+      </script>
+    `);
+  }
+
   try {
-    const { nombre, email, password } = req.body;
-    const db = req.db;
-
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ message: 'Faltan datos' });
-    }
-
-    const rol = detectarRol(email);
-    if (!rol) {
-      return res.status(403).json({ message: 'Correo no autorizado' });
-    }
-
     const hash = await bcrypt.hash(password, 10);
 
     db.query(
@@ -79,19 +116,40 @@ router.post('/register', async (req, res) => {
       [nombre, email, rol, hash],
       err => {
         if (err) {
-          console.error(err);
           if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ message: 'Este correo ya está registrado' });
+            return res.send(`
+              <script>
+                alert('Este correo ya está registrado');
+                window.location = '/';
+              </script>
+            `);
           }
-          return res.status(500).json({ message: 'Error al registrar usuario' });
+
+          console.error(err);
+          return res.send(`
+            <script>
+              alert('Error al registrar usuario');
+              window.location = '/';
+            </script>
+          `);
         }
 
-        res.status(200).json({ message: 'Registro exitoso. Ahora inicia sesión' });
+        res.send(`
+          <script>
+            alert('Registro exitoso. Ahora inicia sesión');
+            window.location = '/';
+          </script>
+        `);
       }
     );
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error servidor' });
+    res.send(`
+      <script>
+        alert('Error del servidor');
+        window.location = '/';
+      </script>
+    `);
   }
 });
 
@@ -106,26 +164,40 @@ router.post('/login', (req, res) => {
     'SELECT * FROM usuarios WHERE email = ?',
     [email],
     async (err, results) => {
-      if (err) return res.status(500).json({ message: 'Error servidor' });
-
-      if (results.length === 0) {
-        return res.status(401).json({ message: 'Credenciales incorrectas' });
+      if (err || results.length === 0) {
+        return res.send(`
+          <script>
+            alert('Credenciales incorrectas');
+            window.location = '/';
+          </script>
+        `);
       }
 
       const user = results[0];
       const ok = await bcrypt.compare(password, user.password);
 
       if (!ok) {
-        return res.status(401).json({ message: 'Credenciales incorrectas' });
+        return res.send(`
+          <script>
+            alert('Credenciales incorrectas');
+            window.location = '/';
+          </script>
+        `);
       }
 
       req.session.user = {
         id: user.id,
         nombre: user.nombre,
+        email: user.email,
         rol: user.rol
       };
 
-      res.json({ rol: user.rol });
+      if (user.rol === 'ALUMNO') return res.redirect('/alumno');
+      if (user.rol === 'DOCENTE') return res.redirect('/docente');
+      if (user.rol === 'PERSONAL') return res.redirect('/personal');
+      if (user.rol === 'TECNICO') return res.redirect('/mantenimiento');
+
+      res.redirect('/');
     }
   );
 });
