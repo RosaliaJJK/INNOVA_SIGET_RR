@@ -4,180 +4,322 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte Técnico - Personal TESCHI</title>
+
+    <!-- ICONOS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <style>
-        /* (Tus estilos se mantienen iguales, son muy limpios y profesionales) */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .form-card { background: #ffffff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 900px; padding: 40px; position: relative; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .header h2 { color: #185a9d; font-size: 24px; font-weight: 700; }
-        .settings-container { position: relative; }
-        .btn-cog { background: none; border: none; color: #185a9d; font-size: 22px; cursor: pointer; transition: 0.3s; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: white; min-width: 210px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; border: 1px solid #eee; }
-        .dropdown-menu button { width: 100%; padding: 12px 15px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 10px; color: #4a5568; }
-        .dropdown-menu button:hover { background: #f8f9fa; color: #185a9d; }
-        .settings-container.active .dropdown-menu { display: block; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
-        .section-title { color: #185a9d; font-size: 15px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        body {
+            background: #f4f7f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 15px;
+        }
+
+        .header h2 {
+            color: #185a9d;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* ===== ENGRANE (IGUAL A DOCENTE) ===== */
+        .icon-group { position: relative; }
+
+        #cogButton {
+            background: none;
+            border: none;
+            color: #185a9d;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #cogButton:hover {
+            transform: rotate(90deg);
+            color: #1a365d;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background: #ffffff;
+            min-width: 260px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 9999;
+            padding: 6px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .dropdown-content button,
+        .dropdown-content a {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #334155;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 12px;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .dropdown-content button:hover,
+        .dropdown-content a:hover {
+            background: #f1f5f9;
+            transform: scale(1.02);
+            color: #1a365d;
+        }
+
+        .dropdown-content hr {
+            margin: 6px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+
+        .logout i { color: #dc2626; }
+        .logout span { text-decoration: underline; }
+
+        /* ===== FORMULARIO ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #185a9d;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+        }
+
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; background: #fcfcfc; }
-        input:focus, select:focus { border-color: #185a9d; background: #fff; box-shadow: 0 0 0 3px rgba(24,90,157,0.1); }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fcfcfc;
+        }
+
         textarea { resize: none; min-height: 110px; }
-        .action-btns { display: flex; gap: 15px; margin-bottom: 15px; }
-        .btn-submit { flex: 2; background: #20c997; color: white; border: none; padding: 15px; border-radius: 30px; font-weight: 700; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-update { flex: 1; background: white; color: #185a9d; border: 2px solid #185a9d; padding: 15px; border-radius: 30px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-        .btn-logout { width: 100%; background: white; color: #e53e3e; border: 2px solid #e53e3e; padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .btn-submit:hover { background: #17a589; transform: translateY(-1px); }
-        .btn-update:hover { background: #f0f7ff; }
-        .btn-logout:hover { background: #fff5f5; }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; gap: 20px; } }
+
+        .action-btns {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-submit {
+            flex: 2;
+            background: #20c997;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-update {
+            flex: 1;
+            background: white;
+            color: #185a9d;
+            border: 2px solid #185a9d;
+            padding: 15px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="form-card">
-        <header class="header">
-            <h2>Solicitud de Soporte Técnico</h2>
-            <div class="settings-container" id="settingsMenu">
-                <button class="btn-cog" onclick="toggleMenu()"><i class="fas fa-cog"></i></button>
-                <div class="dropdown-menu">
-                    <button onclick="reportUI()"><i class="fas fa-exclamation-triangle" style="color: #e53e3e;"></i> Reportar Problema de Interfaz</button>
-                    <button onclick="checkSystem()"><i class="fas fa-signal"></i> Estado del Sistema</button>
-                </div>
-            </div>
-        </header>
+<div class="form-card">
 
-        <form action="/enviar-soporte-personal" method="POST">
-            <div class="form-grid">
-                <div class="form-section">
-                    <h3 class="section-title">Información del Solicitante</h3>
-                    
-                    <div class="form-group">
-                        <label>Nombre del Personal</label>
-                        <input type="text" name="nombre_personal" value="<%= user.nombre %>" readonly style="background: #edf2f7; color: #718096;">
-                    </div>
+    <!-- HEADER -->
+    <header class="header">
+        <h2>Solicitud de Soporte Técnico</h2>
 
-                    <div class="form-group">
-                        <label>Correo Institucional</label>
-                        <input type="email" value="<%= user.email %>" readonly style="background: #edf2f7; color: #718096;">
-                    </div>
+        <div class="icon-group">
+            <button id="cogButton">
+                <i class="fa-solid fa-gear"></i>
+            </button>
 
-                    <div class="form-group">
-                        <label>Área o Departamento destino de la falla</label>
-                        <select name="area" required>
-                            <option value="" disabled selected>Seleccione área afectada...</option>
-                            <option value="Sistemas - Edificio J">Sistemas - Edificio J</option>
-                            <option value="Control Escolar">Control Escolar</option>
-                            <option value="Recursos Humanos">Recursos Humanos</option>
-                            <option value="Dirección General">Dirección General</option>
-                            <option value="Laboratorios Pesados">Laboratorios Pesados</option>
-                            <option value="Biblioteca">Biblioteca</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Descripción de la Falla</label>
-                        <textarea name="descripcion" placeholder="Ej: Mi computadora no enciende o el internet está lento en mi oficina..." required></textarea>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3 class="section-title">Detalles de la Incidencia</h3>
-
-                    <div class="form-group">
-                        <label>Tipo de Problema</label>
-                        <select name="tipo_incidencia" required>
-                            <option value="" disabled selected>Seleccione...</option>
-                            <option value="Hardware">Hardware (Monitor, PC, Impresora)</option>
-                            <option value="Software">Software (Windows, Office, SIGET)</option>
-                            <option value="Red">Red / Telefonía / Internet</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Prioridad Solicitada</label>
-                        <select name="prioridad" required>
-                            <option value="Baja">Baja (Puede esperar)</option>
-                            <option value="Media" selected>Media (Urgencia normal)</option>
-                            <option value="Alta">Alta (Crítico / Bloqueante)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Preferencia de Atención</label>
-                        <select name="tipo_atencion" required>
-                            <option value="Presencial">Presencial (Visita técnica)</option>
-                            <option value="Remoto">Remoto (AnyDesk / TeamViewer)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Fecha sugerida para cita</label>
-                        <input type="date" name="fecha_cita" id="fecha_cita" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Turno de Trabajo</label>
-                        <select name="turno" required>
-                            <option value="Matutino">Matutino</option>
-                            <option value="Vespertino">Vespertino</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="action-btns">
-                <button type="submit" class="btn-submit">Generar Ticket de Soporte</button>
-                <button type="button" class="btn-update" onclick="location.reload()">
-                    <i class="fas fa-sync-alt"></i> Limpiar Formulario
+            <div class="dropdown-content" id="settingsMenu">
+                <button onclick="reportUI()">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Reportar Problema</span>
                 </button>
+
+                <button onclick="checkSystem()">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Estado del Sistema</span>
+                </button>
+
+                <hr>
+
+                <a href="/logout" class="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
             </div>
+        </div>
+    </header>
 
-            <button type="button" class="btn-logout" onclick="logout()">Cerrar Sesión Segura</button>
-        </form>
-    </div>
+    <!-- FORM -->
+    <form action="/enviar-soporte-personal" method="POST">
+        <div class="form-grid">
 
-    
+            <section>
+                <h3 class="section-title">Información del Solicitante</h3>
 
-    <script>
-        // --- FUNCIONES DEL ENGRANE ---
-        function toggleMenu() {
-            document.getElementById('settingsMenu').classList.toggle('active');
-        }
+                <label>Nombre del Personal</label>
+                <input value="<%= user.nombre %>" readonly style="background:#edf2f7">
 
-        async function checkSystem() {
-            try {
-                const res = await fetch('/api/estado-sistema');
-                const data = await res.json();
-                alert(`ESTADO DE SERVICIOS TESCHI\n\nConectividad: ${data.status.toUpperCase()}\nBase de Datos: ${data.database}\nHora Servidor: ${new Date(data.timestamp).toLocaleTimeString()}`);
-            } catch (e) {
-                alert('El servidor central de TI no responde. Verifique su cable de red.');
-            }
-        }
+                <label>Correo Institucional</label>
+                <input value="<%= user.email %>" readonly style="background:#edf2f7">
 
-        function reportUI() {
-            prompt("Describa el error visual que presenta el formulario:");
-            alert("Reporte enviado al equipo de desarrollo.");
-        }
+                <label>Área o Departamento</label>
+                <select name="area" required>
+                    <option disabled selected>Seleccione área...</option>
+                    <option>Sistemas - Edificio J</option>
+                    <option>Control Escolar</option>
+                    <option>Recursos Humanos</option>
+                    <option>Dirección General</option>
+                    <option>Laboratorios Pesados</option>
+                    <option>Biblioteca</option>
+                </select>
 
-        function logout() {
-            if(confirm("¿Desea cerrar su sesión de personal?")) window.location.href = '/logout';
-        }
+                <label>Descripción de la Falla</label>
+                <textarea name="descripcion" required></textarea>
+            </section>
 
-        // --- VALIDACIÓN DE FECHA (No permitir fechas pasadas) ---
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('fecha_cita').setAttribute('min', today);
+            <section>
+                <h3 class="section-title">Detalles de la Incidencia</h3>
 
-        // Cerrar menú al hacer clic fuera
-        window.onclick = function(event) {
-            if (!event.target.closest('.settings-container')) {
-                document.getElementById('settingsMenu').classList.remove('active');
-            }
-        }
-    </script>
+                <label>Tipo de Problema</label>
+                <select name="tipo_incidencia" required>
+                    <option disabled selected>Seleccione...</option>
+                    <option>Hardware</option>
+                    <option>Software</option>
+                    <option>Red</option>
+                    <option>Otro</option>
+                </select>
+
+                <label>Prioridad</label>
+                <select name="prioridad" required>
+                    <option>Baja</option>
+                    <option selected>Media</option>
+                    <option>Alta</option>
+                </select>
+
+                <label>Tipo de Atención</label>
+                <select name="tipo_atencion" required>
+                    <option>Presencial</option>
+                    <option>Remoto</option>
+                </select>
+
+                <label>Fecha sugerida</label>
+                <input type="date" name="fecha_cita" id="fecha_cita" required>
+
+                <label>Turno</label>
+                <select name="turno" required>
+                    <option>Matutino</option>
+                    <option>Vespertino</option>
+                </select>
+            </section>
+
+        </div>
+
+        <div class="action-btns">
+            <button class="btn-submit">Generar Ticket</button>
+            <button type="button" class="btn-update" onclick="location.reload()">
+                <i class="fas fa-sync-alt"></i> Limpiar
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<script>
+    const cogButton = document.getElementById("cogButton");
+    const menu = document.getElementById("settingsMenu");
+
+    cogButton.onclick = (e) => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    };
+
+    document.onclick = () => menu.style.display = "none";
+
+    async function checkSystem() {
+        const res = await fetch('/api/estado-sistema');
+        const data = await res.json();
+        alert(`Sistema: ${data.status}\nBD: ${data.database}`);
+    }
+
+    function reportUI() {
+        prompt("Describe el problema:");
+        alert("Reporte enviado.");
+    }
+
+    document.getElementById("fecha_cita").min =
+        new Date().toISOString().split("T")[0];
+</script>
+
 </body>
 </html>
