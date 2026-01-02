@@ -229,6 +229,52 @@
                 }
                 .green { background: #48bb78; }
                 .red { background: #e53e3e; }
+
+        .monitor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .estado {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .estado .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        /* Estados */
+        .estado.activo .dot {
+            background-color: #22c55e;
+        }
+
+        .estado.activo .texto {
+            color: #22c55e;
+        }
+
+        .estado.inactivo .dot {
+            background-color: #ef4444;
+        }
+
+        .estado.inactivo .texto {
+            color: #ef4444;
+        }
+
+        /* Línea verde */
+        .linea-verde {
+            border: none;
+            border-top: 3px solid #22c55e;
+            margin-bottom: 12px;
+        }
+            
     </style>
 </head>
 
@@ -300,14 +346,17 @@
 </section>
 
 <section>
-    <h3 class="section-title">
-        2. Monitoreo en Tiempo Real
-                <div id="estadoClase">
+    <div class="monitor-header">
+        <h3>2. Monitoreo en Tiempo Real</h3>
+
+        <div id="estadoClase" class="estado inactivo">
+            <span class="dot"></span>
+            <span class="texto">Inactivo</span>
         </div>
-        <span style="float:right; font-size:12px;">
-            <span class="dot"></span> Activo
-        </span>
-    </h3>
+        </div>
+
+        <hr class="linea-verde">
+
 
     <div class="table-container">
         <table>
@@ -334,26 +383,29 @@
 </div>
 
 <!-- SOCKET.IO -->
-<script>
-const socket = io();
-const estado = document.getElementById("estadoClase");
+    <script>
+        const estado = document.getElementById("estadoClase");
 
-socket.on("estado_clase", data => {
-  if (data.activa) {
-    estado.innerHTML = `<span class="dot green"></span> Activo`;
-  } else {
-    estado.innerHTML = `<span class="dot red"></span> Inactivo`;
-  }
-});
+        function activarEstado() {
+        estado.classList.remove("inactivo");
+        estado.classList.add("activo");
+        estado.querySelector(".texto").textContent = "Activo";
+        }
 
-socket.on("clase_habilitada", () => {
-  estado.innerHTML = `<span class="dot green"></span> Activo`;
-});
+        function desactivarEstado() {
+        estado.classList.remove("activo");
+        estado.classList.add("inactivo");
+        estado.querySelector(".texto").textContent = "Inactivo";
+        }
 
-socket.on("clase_cerrada", () => {
-  estado.innerHTML = `<span class="dot red"></span> Inactivo`;
-});
-</script>
+        socket.on("estado_clase", data => {
+        if (data.activa) activarEstado();
+        else desactivarEstado();
+        });
+
+        socket.on("clase_habilitada", activarEstado);
+        socket.on("clase_cerrada", desactivarEstado);
+    </script>
 
 
 </body>
