@@ -25,21 +25,17 @@ db.getConnection(err => {
   else console.log("✅ MySQL conectado");
 });
 
-// Guardar DB en app
-app.set("db", db);
-
 /* =========================
-   SERVER + SOCKET
+   SERVER + SOCKET.IO
 ========================= */
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-// Guardar io en app
 app.set("io", io);
 
 /* =========================
-   CIERRE AUTOMÁTICO ⏰
+   CIERRE AUTOMÁTICO DE CLASE ⏰
 ========================= */
 setInterval(() => {
   db.query(
@@ -54,7 +50,6 @@ setInterval(() => {
     }
   );
 }, 60000);
-
 
 /* =========================
    MIDDLEWARES
@@ -78,7 +73,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 /* =========================
-   INYECTAR DB EN REQ
+   INYECTAR DB EN REQ (UNA SOLA VEZ)
 ========================= */
 app.use((req, res, next) => {
   req.db = db;
@@ -92,9 +87,17 @@ app.use("/auth", require("./routes/auth"));
 app.use("/alumno", require("./routes/alumno"));
 app.use("/docente", require("./routes/docente"));
 app.use("/personal", require("./routes/personal"));
+app.use("/api", require("./routes/api"));
 
 app.get("/", (req, res) => {
   res.render("login");
+});
+
+app.get("/recuperar-contrasena", (req, res) => {
+  res.render("recuperar-contrasena", {
+    error: null,
+    success: null
+  });
 });
 
 /* =========================
@@ -113,8 +116,7 @@ io.on("connection", socket => {
   );
 });
 
-
-/* ========================
+/* =========================
    SERVIDOR
 ========================= */
 const PORT = process.env.PORT || 3000;
