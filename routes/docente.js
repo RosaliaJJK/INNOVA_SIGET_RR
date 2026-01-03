@@ -31,8 +31,12 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
     [idZona],
     (err, rows) => {
       if (err) {
-        console.error("❌ Error al verificar clase:", err.sqlMessage);
-        return res.status(500).send("Error al verificar clase activa");
+        console.error("❌ ERROR MYSQL COMPLETO:", err);
+        return res.status(500).json({
+          mensaje: "Error al abrir la clase",
+          error: err.sqlMessage,
+          codigo: err.code
+        });
       }
 
       if (rows && rows.length > 0) {
