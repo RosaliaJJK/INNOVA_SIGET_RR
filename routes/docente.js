@@ -19,12 +19,11 @@ router.post("/abrir-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =>
   const { carrera, laboratorio, hora_inicio, hora_fin } = req.body;
   const docenteId = req.session.user.id;
 
-  const { id_zona } = req.body;
+  const idZona = parseInt(laboratorio);
 
-    if (!id_zona) {
-      return res.status(400).json({ error: "Zona inválida" });
-    }
-
+  if (isNaN(idZona)) {
+    return res.status(400).send("Laboratorio inválido");
+  }
 
   // 🔍 Verificar si ya hay clase activa
   db.query(
