@@ -20,10 +20,16 @@ const db = mysql.createPool({
   port: process.env.DB_PORT
 });
 
-db.getConnection(err => {
-  if (err) console.error("❌ Error MySQL:", err);
-  else console.log("✅ MySQL conectado");
-});
+(async () => {
+  try {
+    const conn = await db.getConnection();
+    console.log("✅ MySQL conectado");
+    conn.release();
+  } catch (err) {
+    console.error("❌ Error MySQL:", err.message);
+  }
+})();
+
 
 /* =========================
    SERVER + SOCKET.IO
