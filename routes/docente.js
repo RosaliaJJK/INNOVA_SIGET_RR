@@ -86,4 +86,5 @@ router.post("/cerrar-clase", verificarSesion, soloRol(["DOCENTE"]), (req, res) =
     }
   );
 });
+
 module.exports = router;
