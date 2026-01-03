@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2");
 const session = require("express-session");
@@ -10,26 +11,27 @@ const http = require("http");
 const app = express();
 
 /* =========================
-   BD
+   BD (POOL)
 ========================= */
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT
+  port: process.env.DB_PORT,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-(async () => {
-  try {
-    const conn = await db.getConnection();
-    console.log("✅ MySQL conectado");
-    conn.release();
-  } catch (err) {
+// 🔥 PRUEBA DE CONEXIÓN (FORMA CORRECTA)
+db.query("SELECT 1", (err) => {
+  if (err) {
     console.error("❌ Error MySQL:", err.message);
+  } else {
+    console.log("✅ MySQL conectado");
   }
-})
-();
+});
 
 /* =========================
    SERVER + SOCKET.IO
@@ -79,7 +81,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 /* =========================
-   INYECTAR DB EN REQ (UNA SOLA VEZ)
+   INYECTAR DB EN REQ
 ========================= */
 app.use((req, res, next) => {
   req.db = db;
