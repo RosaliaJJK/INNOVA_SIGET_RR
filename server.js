@@ -28,8 +28,8 @@ const db = mysql.createPool({
   } catch (err) {
     console.error("❌ Error MySQL:", err.message);
   }
-})();
-
+})
+();
 
 /* =========================
    SERVER + SOCKET.IO
